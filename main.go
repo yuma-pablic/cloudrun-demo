@@ -11,11 +11,9 @@ import (
 func main() {
 	r := chi.NewRouter()
 
-	// ミドルウェア設定（ロギングやリカバリなど）
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// /healthcheck エンドポイント定義
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]string{"status": "ok"}
 
