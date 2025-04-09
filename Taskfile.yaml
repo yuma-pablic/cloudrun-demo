@@ -3,7 +3,12 @@ version: "3"
 silent: true
 
 tasks:
-  run-dev:
+  server:
     desc: Run the application in development mode
     cmds:
       - go run main.go
+
+  lint:
+    desc: Run the linter
+    cmds:
+      - golangci-lint run
