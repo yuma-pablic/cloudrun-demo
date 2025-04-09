@@ -1,0 +1,10 @@
+version: "1"
+linters:
+  enable:
+    - gosimple
+    - staticcheck
+    - unused
+    - govet
+    - errcheck
+  disable:
+    - prealloc
