@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/config"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -18,17 +18,11 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	connStr := "postgres://admin:admin@localhost:5432/postgres"
-	ctx := context.Background()
-
-	dbpool, err := pgxpool.New(ctx, connStr)
-	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
-	}
-	defer dbpool.Close()
+	config.InitDB()
+	defer config.CloseDB()
 
 	var greeting string
-	err = dbpool.QueryRow(ctx, "SELECT 'Hello from Postgres!'").Scan(&greeting)
+	err := config.DB.QueryRow(context.Background(), "SELECT 'Hello from Postgres!'").Scan(&greeting)
 	if err != nil {
 		log.Fatalf("Query failed: %v\n", err)
 	}
