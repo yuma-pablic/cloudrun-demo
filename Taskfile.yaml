@@ -7,7 +7,7 @@ tasks:
     desc: Run the application in development mode
     cmds:
       - docker compose up -d
-      - go run main.go
+      - go run cmd/main.go
 
   lint:
     desc: Run the linter
