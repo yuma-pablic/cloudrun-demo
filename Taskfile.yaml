@@ -19,3 +19,13 @@ tasks:
     desc: Format the code
     cmds:
       - sqlfluff fix schema.sql --dialect postgres
+
+  create-migration:
+    desc: Create a new migration
+    cmds:
+      - atlas migrate diff {{.CLI_ARGS}} --env local
+
+  migrate:
+    desc: Run the migrations
+    cmds:
+      - atlas migrate apply --env local
