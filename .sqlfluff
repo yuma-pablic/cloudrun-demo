@@ -3,6 +3,9 @@ dialect = postgres
 templater = jinja
 max_line_length = 88
 
+[sqlfluff:rules]
+exclude_rules = L009
+
 [sqlfluff:rules:capitalisation.keywords]
 capitalisation_policy = upper
 

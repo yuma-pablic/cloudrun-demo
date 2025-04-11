@@ -13,12 +13,12 @@ tasks:
     desc: Run the linter
     cmds:
       - golangci-lint run
-      - sqlfluff lint schema.sql --dialect postgres
+      - sqlfluff lint schema.sql queries/ --dialect postgres
 
   fmt:
     desc: Format the code
     cmds:
-      - sqlfluff fix schema.sql --dialect postgres
+      - sqlfluff fix schema.sql queries/ --dialect postgres
 
   create-migration:
     desc: Create a new migration

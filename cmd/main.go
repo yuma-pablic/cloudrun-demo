@@ -2,9 +2,9 @@ package main
 
 import (
 	"api/config"
+	sqlc "api/infra/sqlc"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -18,19 +18,19 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	config.InitDB()
+	conn := config.InitDB()
 	defer config.CloseDB()
 
-	var greeting string
-	err := config.DB.QueryRow(context.Background(), "SELECT 'Hello from Postgres!'").Scan(&greeting)
-	if err != nil {
-		log.Fatalf("Query failed: %v\n", err)
-	}
-	fmt.Println(greeting)
+	db := sqlc.New(conn)
 
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		// 正常ならOKレスポンスを返す
+		_, err := db.Healthcheck(context.Background())
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			log.Printf("failed to encode response: %v", err)
+		}
 		response := map[string]string{"status": "ok"}
-
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
