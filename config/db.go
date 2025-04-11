@@ -11,15 +11,16 @@ import (
 
 var DB *pgxpool.Pool
 
-func InitDB() {
+func InitDB() *pgxpool.Pool {
 	connStr := getConnStr()
 	ctx := context.Background()
 
-	var err error
-	DB, err = pgxpool.New(ctx, connStr)
+	db, err := pgxpool.New(ctx, connStr)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
+
+	return db
 }
 
 func CloseDB() {
