@@ -1,0 +1,15 @@
+[sqlfluff]
+dialect = postgres
+templater = jinja
+rules = L003,L010,L016,L023,L034,L039
+max_line_length = 88
+
+[sqlfluff:rules:L010]
+capitalisation_policy = upper
+
+[sqlfluff:rules:L016]
+spacing_policy = no_space
+
+[sqlfluff:rules:L039]
+capitalisation_policy = lower
+force_enable = true

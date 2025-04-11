@@ -13,3 +13,9 @@ tasks:
     desc: Run the linter
     cmds:
       - golangci-lint run
+      - sqlfluff lint schema.sql --dialect postgres
+
+  fmt:
+    desc: Format the code
+    cmds:
+      - sqlfluff fix schema.sql --dialect postgres
