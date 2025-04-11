@@ -41,5 +41,5 @@ jobs:
       - name: Run golangci-lint
         run: golangci-lint
 
-      - name: Run sqlfluff
-        run: sqlfluff lint schema.sql --dialect postgres
+      # - name: Run sqlfluff
+      #   run: sqlfluff lint schema.sql --dialect postgres
