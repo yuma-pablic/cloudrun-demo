@@ -25,7 +25,7 @@ services:
     command: >
       migrate apply
       --dir file:///migrations
-      --url postgres://admin:admin@db:5432/postgres?sslmode=disable
+      --url postgresql://admin:admin@db:5432/app?sslmode=disable
       --allow-dirty
     depends_on:
       db:
@@ -39,13 +39,13 @@ services:
     image: quay.io/prometheuscommunity/postgres-exporter
     container_name: postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "admin:admin@tcp(db:5432)/postgres"
+      DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/app?sslmode=disable"
     networks:
       - my_network
     depends_on:
       - db
     ports:
-      - "9104:9104"
+      - "9187:9187"
 
   grafana-alloy:
     image: grafana/alloy:v1.8.1
@@ -59,14 +59,9 @@ services:
     ports:
       - "12345:12345" # <- 必要なら Alloy のデバッグ・監視用ポート
 
-
-
-
   prometheus:
-   image: prom/prometheus
+   image: prom/prometheus:v2.48.1
    container_name: prometheus
-   networks:
-      - my_network
    ports:
      - '9090:9090'
    volumes:
@@ -74,6 +69,9 @@ services:
      - 'prometheus-data:/prometheus'
    command:
      - '--config.file=/etc/prometheus/prometheus.yml'
+     - '--web.enable-remote-write-receiver'
+   networks:
+     - my_network
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -93,7 +91,8 @@ services:
     volumes:
       - 'grafana_storage:/var/lib/grafana'
       - './grafana/datasources:/etc/grafana/provisioning/datasources'
-
+      - './grafana/dashboards:/var/lib/grafana/dashboards'
+      - './grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml'
     networks:
       - my_network
     depends_on:
