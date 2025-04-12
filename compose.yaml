@@ -46,6 +46,22 @@ services:
       - db
     ports:
       - "9104:9104"
+
+  grafana-alloy:
+    image: grafana/alloy:v1.8.1
+    container_name: grafana-alloy
+    working_dir: /etc/alloy
+    command: ["run", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./alloy:/etc/alloy
+    networks:
+      - my_network
+    ports:
+      - "12345:12345" # <- 必要なら Alloy のデバッグ・監視用ポート
+
+
+
+
   prometheus:
    image: prom/prometheus
    container_name: prometheus

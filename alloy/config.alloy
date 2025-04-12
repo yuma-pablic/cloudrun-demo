@@ -1,0 +1,15 @@
+prometheus.scrape "postgres_exporter" {
+  targets = [
+    {
+      __address__ = "postgres-exporter:9104",
+      job         = "postgres-exporter",
+    },
+  ]
+  forward_to = [prometheus.remote_write.prom.receiver]
+}
+
+prometheus.remote_write "prom" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
