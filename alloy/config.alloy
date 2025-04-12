@@ -1,14 +1,13 @@
-prometheus.scrape "postgres_exporter" {
-  targets = [
-    {
-      __address__ = "postgres-exporter:9104",
-      job         = "postgres-exporter",
-    },
-  ]
-  forward_to = [prometheus.remote_write.prom.receiver]
+prometheus.exporter.postgres "example" {
+  data_source_names = ["postgresql://admin:admin@db:5432/app?sslmode=disable"]
 }
 
-prometheus.remote_write "prom" {
+prometheus.scrape "default" {
+  targets    = prometheus.exporter.postgres.example.targets
+  forward_to = [prometheus.remote_write.demo.receiver]
+}
+
+prometheus.remote_write "demo" {
   endpoint {
     url = "http://prometheus:9090/api/v1/write"
   }
