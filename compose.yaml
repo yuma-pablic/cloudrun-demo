@@ -35,8 +35,15 @@ services:
     networks:
       - my_network
 
+  node-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: node-exporter
+    ports:
+      - '9100:9100'
+    networks:
+      - my_network
   postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter
+    image: prometheuscommunity/postgres-exporter:v0.17.1
     container_name: postgres-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/app?sslmode=disable"

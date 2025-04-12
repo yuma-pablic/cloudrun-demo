@@ -12,3 +12,11 @@ prometheus.remote_write "demo" {
     url = "http://prometheus:9090/api/v1/write"
   }
 }
+
+prometheus.exporter.unix "demo" { }
+
+prometheus.scrape "demo" {
+  targets    = prometheus.exporter.unix.demo.targets
+  forward_to = [prometheus.remote_write.demo.receiver]
+}
+
