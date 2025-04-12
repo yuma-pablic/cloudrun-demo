@@ -21,6 +21,7 @@ services:
 
   migrate:
     image: arigaio/atlas:latest
+    container_name: migrate
     command: >
       migrate apply
       --dir file:///migrations
@@ -34,8 +35,58 @@ services:
     networks:
       - my_network
 
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "admin:admin@tcp(db:5432)/postgres"
+    networks:
+      - my_network
+    depends_on:
+      - db
+    ports:
+      - "9104:9104"
+  prometheus:
+   image: prom/prometheus
+   container_name: prometheus
+   networks:
+      - my_network
+   ports:
+     - '9090:9090'
+   volumes:
+     - './prometheus/prometheus.yml:/etc/prometheus/prometheus.yml'
+     - 'prometheus-data:/prometheus'
+   command:
+     - '--config.file=/etc/prometheus/prometheus.yml'
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_DATABASE_TYPE: postgres
+      GF_DATABASE_HOST: db:5432
+      GF_DATABASE_NAME: postgres
+      GF_DATABASE_USER: admin
+      GF_DATABASE_PASSWORD: admin
+      GF_DATABASE_SSL_MODE: disable
+      GF_INSTALL_PLUGINS: grafana-pyroscope-app,https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
+    restart: unless-stopped
+    volumes:
+      - 'grafana_storage:/var/lib/grafana'
+      - './grafana/datasources:/etc/grafana/provisioning/datasources'
+
+    networks:
+      - my_network
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
-
+  grafana_storage:
+  prometheus-data:
 networks:
   my_network:
