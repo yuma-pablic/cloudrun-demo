@@ -33,3 +33,11 @@ datasources:
       incrementalQueryOverlapWindow: 10m
       exemplarTraceIdDestinations:
       uid: PBFA97CFB590B2093
+  
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    jsonData:
+      timeout: 60
+      maxLines: 1000
