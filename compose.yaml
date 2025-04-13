@@ -79,6 +79,15 @@ services:
      - '--web.enable-remote-write-receiver'
    networks:
      - my_network
+  
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:2.9.6
+    command: "-config.file=/etc/promtail/promtail.yaml"
+    volumes:
+      - ./promtail:/etc/promtail/
+    networks:
+      - my_network
   grafana:
     image: grafana/grafana
     container_name: grafana

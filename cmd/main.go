@@ -3,12 +3,12 @@ package main
 import (
 	"api/config"
 	sqlc "api/infra/sqlc"
+	"api/libs/logger"
 	"api/libs/metrics"
 	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,10 +28,7 @@ func main() {
 
 	metrics := metrics.NewMetrics()
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
-	slog.SetDefault(logger)
+	logger.InitLogger()
 
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
