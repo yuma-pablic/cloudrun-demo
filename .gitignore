@@ -26,3 +26,6 @@ go.work.sum
 
 # alloy
 alloy/data-alloy
+
+# logs
+logs/app.log

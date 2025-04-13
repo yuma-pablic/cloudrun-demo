@@ -44,6 +44,7 @@ func main() {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			slog.Error("failed to encode response", slog.String("error", err.Error()))
 		}
+		slog.Info("healthcheck success")
 	})
 
 	r.Handle("/metrics", promhttp.Handler())
