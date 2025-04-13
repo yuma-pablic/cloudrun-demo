@@ -60,11 +60,12 @@ services:
     working_dir: /etc/alloy
     command: ["run", "/etc/alloy/config.alloy"]
     volumes:
+      - ./logs:/logs
       - ./alloy:/etc/alloy
     networks:
       - my_network
     ports:
-      - "12345:12345" # <- 必要なら Alloy のデバッグ・監視用ポート
+      - "12345:12345"
 
   prometheus:
    image: prom/prometheus:v2.48.1
@@ -79,6 +80,19 @@ services:
      - '--web.enable-remote-write-receiver'
    networks:
      - my_network
+  loki:
+    container_name: loki
+    image: grafana/loki:3.0.0
+    command: "-config.file=/etc/loki/loki.yaml"
+    environment:
+      LOG_CLUSTER_DEPTH: '8'
+      LOG_SIM_TH: '0.3'
+    volumes:
+      - ./loki/loki.yaml:/etc/loki/loki.yaml
+    networks:
+      - my_network
+    ports:
+      - 3100:3100
   grafana:
     image: grafana/grafana
     container_name: grafana
