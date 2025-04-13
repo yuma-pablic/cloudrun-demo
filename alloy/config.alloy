@@ -20,3 +20,11 @@ prometheus.scrape "demo" {
   forward_to = [prometheus.remote_write.demo.receiver]
 }
 
+prometheus.scrape "app" {
+  targets = [
+    {"__address__" = "host.docker.internal:8080"},
+  ]
+  metrics_path = "/metrics"
+  scrape_interval = "15s"
+  forward_to = [prometheus.remote_write.demo.receiver]
+}
