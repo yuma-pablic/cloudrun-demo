@@ -3,6 +3,7 @@ package main
 import (
 	"api/config"
 	sqlc "api/infra/sqlc"
+	"api/libs/metrics"
 	"context"
 	"encoding/json"
 	"log"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -23,7 +25,10 @@ func main() {
 
 	db := sqlc.New(conn)
 
+	metrics := metrics.NewMetrics()
+
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
 		// 正常ならOKレスポンスを返す
 		_, err := db.Healthcheck(context.Background())
 		if err != nil {
@@ -37,6 +42,8 @@ func main() {
 			log.Printf("failed to encode response: %v", err)
 		}
 	})
+
+	r.Handle("/metrics", promhttp.Handler())
 
 	log.Println("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", r); err != nil {
