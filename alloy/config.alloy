@@ -28,3 +28,20 @@ prometheus.scrape "app" {
   scrape_interval = "15s"
   forward_to = [prometheus.remote_write.demo.receiver]
 }
+
+loki.source.file "app" {
+  targets = [
+    {
+      __path__ = "/logs/app.log",
+      job      = "app",
+    },
+  ]
+
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
