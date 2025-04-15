@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"net/http/pprof"
 
+	"api/custom"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -37,6 +39,7 @@ func main() {
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(custom.TraceIDMiddleware)
 
 	conn := config.InitDB()
 	defer config.CloseDB()
