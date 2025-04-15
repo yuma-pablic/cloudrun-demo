@@ -41,3 +41,11 @@ datasources:
     jsonData:
       timeout: 60
       maxLines: 1000
+
+  - name: Pyroscope
+    type: grafana-pyroscope-datasource
+    access: proxy
+    url: http://pyroscope:4040
+    jsonData:
+      timeout: 60
+      maxLines: 1000
