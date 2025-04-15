@@ -7,11 +7,13 @@ import (
 	"api/libs/metrics"
 	"context"
 	"encoding/json"
+	"log"
 	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/grafana/pyroscope-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -29,6 +31,23 @@ func main() {
 	metrics := metrics.NewMetrics()
 
 	logger.InitLogger()
+
+	_, err := pyroscope.Start(pyroscope.Config{
+		ApplicationName: "myapp.local",
+		ServerAddress:   "http://localhost:4040", // Alloy 側のアドレスにする
+		Logger:          pyroscope.StandardLogger,
+		ProfileTypes: []pyroscope.ProfileType{
+			pyroscope.ProfileCPU,
+			pyroscope.ProfileAllocObjects,
+			pyroscope.ProfileInuseObjects,
+			pyroscope.ProfileAllocSpace,
+			pyroscope.ProfileInuseSpace,
+		},
+	})
+
+	if err != nil {
+		log.Fatalf("failed to start pyroscope: %v", err)
+	}
 
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()

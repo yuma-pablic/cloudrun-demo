@@ -68,3 +68,18 @@ loki.process "app" {
 
   forward_to = [loki.write.default.receiver]
 }
+
+pyroscope.scrape "myapp" {
+  targets = ["http://host.docker.internal:4040"] # ← Appのpyroscope endpoint
+  application_name = "myapp.local"
+}
+
+pyroscope.write "default" {
+  endpoint = "http://pyroscope:4040" # ← Pyroscope サーバーのURL
+}
+
+pyroscope.relabel "default" {
+  forward_to = [pyroscope.write.default.receiver]
+}
+
+pyroscope.scrape.myapp.forward_to = [pyroscope.relabel.default.receiver]

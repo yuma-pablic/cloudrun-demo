@@ -93,6 +93,14 @@ services:
       - my_network
     ports:
       - 3100:3100
+  
+  pyroscope:
+    image: grafana/pyroscope:latest
+    container_name: pyroscope
+    ports:
+      - "4040:4040"
+    networks:
+      - my_network
   grafana:
     image: grafana/grafana
     container_name: grafana
