@@ -9,12 +9,29 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"net/http/pprof"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+func MountPprofRoutes(r chi.Router) {
+	r.Route("/debug/pprof", func(r chi.Router) {
+		r.Get("/", pprof.Index)
+		r.Get("/allocs", pprof.Handler("allocs").ServeHTTP)
+		r.Get("/block", pprof.Handler("block").ServeHTTP)
+		r.Get("/cmdline", pprof.Cmdline)
+		r.Get("/goroutine", pprof.Handler("goroutine").ServeHTTP)
+		r.Get("/heap", pprof.Handler("heap").ServeHTTP)
+		r.Get("/mutex", pprof.Handler("mutex").ServeHTTP)
+		r.Get("/profile", pprof.Profile)
+		r.Post("/symbol", pprof.Symbol)
+		r.Get("/symbol", pprof.Symbol)
+		r.Get("/threadcreate", pprof.Handler("threadcreate").ServeHTTP)
+		r.Get("/trace", pprof.Trace)
+	})
+}
 func main() {
 	r := chi.NewRouter()
 
@@ -29,6 +46,8 @@ func main() {
 	metrics := metrics.NewMetrics()
 
 	logger.InitLogger()
+
+	MountPprofRoutes(r)
 
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
@@ -48,7 +67,6 @@ func main() {
 	})
 
 	r.Handle("/metrics", promhttp.Handler())
-
 	slog.Info("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		slog.Error("server failed to start", slog.String("error", err.Error()))
