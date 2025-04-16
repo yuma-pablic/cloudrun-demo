@@ -59,7 +59,6 @@ func MountPprofRoutes(r chi.Router) {
 	})
 }
 func main() {
-	// 初期化
 	ctx := context.Background()
 	logger.InitLogger()
 
@@ -74,29 +73,23 @@ func main() {
 		}
 	}()
 
-	// ルーター作成
 	r := chi.NewRouter()
 
-	// ✅ ミドルウェアはルート定義より前にすべて定義
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// OpenTelemetryミドルウェア（Span作成）
 	r.Use(func(next http.Handler) http.Handler {
 		return otelhttp.NewHandler(next, "chi-handler")
 	})
 
-	// trace_id を context に埋め込む
 	r.Use(custom.TraceIDMiddleware)
 
-	// DBとメトリクスの初期化
 	conn := config.InitDB()
 	defer config.CloseDB()
 
 	db := sqlc.New(conn)
 	metrics := metrics.NewMetrics()
 
-	// ✅ ルート定義はミドルウェア定義の後
 	MountPprofRoutes(r)
 
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {

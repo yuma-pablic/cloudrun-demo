@@ -93,7 +93,6 @@ func InitLogger() {
 		Level: slog.LevelInfo,
 	})
 
-	// 👇 MultiHandler を TraceHandler でラップ
 	baseHandler := NewMultiHandler(stdoutHandler, fileHandler)
 	traceAwareHandler := &traceHandler{Handler: baseHandler}
 
