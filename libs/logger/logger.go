@@ -4,7 +4,21 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
+	"api/ctxx"
 )
+
+type TraceHandler struct {
+	slog.Handler
+}
+
+func (h *TraceHandler) Handle(ctx context.Context, r slog.Record) error {
+	traceID := ctxx.GetTraceID(ctx)
+	if traceID != "" {
+		r.AddAttrs(slog.String("trace_id", traceID))
+	}
+	return h.Handler.Handle(ctx, r)
+}
 
 type multiHandler struct {
 	handlers []slog.Handler
@@ -46,11 +60,23 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 	return &multiHandler{handlers: newHandlers}
 }
 
+// ✅ TraceID を付与するカスタムハンドラ
+type traceHandler struct {
+	slog.Handler
+}
+
+func (h *traceHandler) Handle(ctx context.Context, r slog.Record) error {
+	traceID := ctxx.GetTraceID(ctx)
+	if traceID != "" {
+		r.AddAttrs(slog.String("trace_id", traceID))
+	}
+	return h.Handler.Handle(ctx, r)
+}
+
 func InitLogger() {
 	logDir := "./logs"
 	logPath := logDir + "/app.log"
 
-	// ディレクトリが存在しなければ作成
 	if err := os.MkdirAll(logDir, 0755); err != nil {
 		panic("failed to create log directory: " + err.Error())
 	}
@@ -63,13 +89,13 @@ func InitLogger() {
 	stdoutHandler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	})
-
 	fileHandler := slog.NewJSONHandler(logFile, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	})
 
-	handler := NewMultiHandler(stdoutHandler, fileHandler)
+	baseHandler := NewMultiHandler(stdoutHandler, fileHandler)
+	traceAwareHandler := &traceHandler{Handler: baseHandler}
 
-	logger := slog.New(handler)
+	logger := slog.New(traceAwareHandler)
 	slog.SetDefault(logger)
 }
