@@ -22,7 +22,7 @@ prometheus.scrape "demo" {
 
 prometheus.scrape "app" {
   targets = [
-    {"__address__" = "host.docker.internal:8080"},
+    {"__address__" = "0.0.0.0:8080"},
   ]
   metrics_path = "/metrics"
   scrape_interval = "15s"
@@ -114,4 +114,48 @@ pyroscope.scrape "scrape_job_name" {
                         enabled = true
                 }
         }
+}
+
+otelcol.exporter.otlp "default" {
+  client {
+    endpoint = "tempo:3200"
+
+    tls {
+      insecure = true
+    }
+  }
+}
+
+otelcol.processor.batch "default" {
+  timeout = "1s"
+
+  output {
+    traces = [
+      otelcol.exporter.otlp.default.input,
+    ]
+  }
+}
+
+otelcol.processor.memory_limiter "default" {
+  check_interval = "1s"
+
+  limit = "200MiB"
+
+  output {
+    traces = [
+      otelcol.processor.batch.default.input,
+    ]
+  }
+}
+
+otelcol.receiver.otlp "default" {
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces = [
+      otelcol.processor.memory_limiter.default.input,
+    ]
+  }
 }

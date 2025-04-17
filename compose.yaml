@@ -66,6 +66,18 @@ services:
       - my_network
     ports:
       - "12345:12345"
+  
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - my_network
 
   prometheus:
    image: prom/prometheus:v2.48.1

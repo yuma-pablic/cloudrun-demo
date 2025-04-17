@@ -26,7 +26,10 @@ import (
 )
 
 func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {
-	exp, err := otlptracehttp.New(ctx)
+	exp, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpoint("localhost:12345"),
+		otlptracehttp.WithInsecure(),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +38,7 @@ func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {
 		sdktrace.WithBatcher(exp),
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("my-go-app"),
+			semconv.ServiceNameKey.String("app"),
 		)),
 	)
 	otel.SetTracerProvider(tp)
@@ -116,7 +119,7 @@ func main() {
 	r.Handle("/metrics", promhttp.Handler())
 
 	slog.Info("Starting server on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
 		slog.Error("server failed to start", slog.String("error", err.Error()))
 	}
 }
