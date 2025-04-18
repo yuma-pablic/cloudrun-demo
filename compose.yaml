@@ -61,7 +61,7 @@ services:
     command: ["run", "/etc/alloy/config.alloy"]
     volumes:
       - ./logs:/logs
-      - ./alloy:/etc/alloy
+      - ./o11y/alloy:/etc/alloy
     networks:
       - my_network
     ports:
