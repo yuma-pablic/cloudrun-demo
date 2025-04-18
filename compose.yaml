@@ -66,13 +66,12 @@ services:
       - my_network
     ports:
       - "9999:9999"
-  
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     volumes:
-      - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
+      - ./o11y/tempo/tempo.yaml:/etc/tempo/tempo.yaml
     ports:
       - "3200:3200"
       - "4317:4317"
@@ -86,7 +85,7 @@ services:
    ports:
      - '9090:9090'
    volumes:
-     - './prometheus/prometheus.yml:/etc/prometheus/prometheus.yml'
+     - './o11y/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml'
      - 'prometheus-data:/prometheus'
    command:
      - '--config.file=/etc/prometheus/prometheus.yml'
@@ -101,12 +100,11 @@ services:
       LOG_CLUSTER_DEPTH: '8'
       LOG_SIM_TH: '0.3'
     volumes:
-      - ./loki/loki.yaml:/etc/loki/loki.yaml
+      - ./o11y/loki/loki.yaml:/etc/loki/loki.yaml
     networks:
       - my_network
     ports:
       - 3100:3100
-  
   pyroscope:
     image: grafana/pyroscope:latest
     container_name: pyroscope
@@ -132,9 +130,9 @@ services:
     restart: unless-stopped
     volumes:
       - 'grafana_storage:/var/lib/grafana'
-      - './grafana/datasources:/etc/grafana/provisioning/datasources'
-      - './grafana/dashboards:/var/lib/grafana/dashboards'
-      - './grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml'
+      - './o11y/grafana/datasources:/etc/grafana/provisioning/datasources'
+      - './o11y/grafana/dashboards:/var/lib/grafana/dashboards'
+      - './o11y/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml'
     networks:
       - my_network
     depends_on:
