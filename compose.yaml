@@ -65,7 +65,7 @@ services:
     networks:
       - my_network
     ports:
-      - "12345:12345"
+      - "9999:9999"
   
   tempo:
     image: grafana/tempo:latest
@@ -74,6 +74,7 @@ services:
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo/tempo.yaml
     ports:
+      - "3200:3200"
       - "4317:4317"
       - "4318:4318"
     networks:
