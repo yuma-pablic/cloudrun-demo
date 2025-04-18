@@ -100,7 +100,7 @@ services:
       LOG_CLUSTER_DEPTH: '8'
       LOG_SIM_TH: '0.3'
     volumes:
-      - ./loki/loki.yaml:/etc/loki/loki.yaml
+      - ./o11y/loki/loki.yaml:/etc/loki/loki.yaml
     networks:
       - my_network
     ports:
