@@ -130,9 +130,9 @@ services:
     restart: unless-stopped
     volumes:
       - 'grafana_storage:/var/lib/grafana'
-      - './grafana/datasources:/etc/grafana/provisioning/datasources'
-      - './grafana/dashboards:/var/lib/grafana/dashboards'
-      - './grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml'
+      - './o11y/grafana/datasources:/etc/grafana/provisioning/datasources'
+      - './o11y/grafana/dashboards:/var/lib/grafana/dashboards'
+      - './o11y/grafana/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml'
     networks:
       - my_network
     depends_on:
