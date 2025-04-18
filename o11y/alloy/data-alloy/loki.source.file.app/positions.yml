@@ -1,4 +1,0 @@
-positions:
-  ? path: /logs/app.log
-    labels: '{job="app"}'
-  : "380562"
