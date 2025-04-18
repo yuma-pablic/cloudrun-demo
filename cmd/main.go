@@ -86,6 +86,9 @@ func main() {
 	})
 
 	r.Use(custom.TraceIDMiddleware)
+	r.Use(func(next http.Handler) http.Handler {
+		return otelhttp.NewHandler(next, "chi-handler")
+	})
 
 	conn := config.InitDB()
 	defer config.CloseDB()
@@ -98,7 +101,11 @@ func main() {
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
 
-		_, err := db.Healthcheck(r.Context()) // ← 修正：ctxではなくリクエストのcontextを使う
+		tr := otel.Tracer("app/handler")
+		ctx, span := tr.Start(r.Context(), "Healthcheck")
+		defer span.End()
+
+		_, err := db.Healthcheck(ctx)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			slog.Error("healthcheck failed", slog.String("error", err.Error()))
@@ -113,7 +120,7 @@ func main() {
 			return
 		}
 
-		slog.InfoContext(r.Context(), "healthcheck success")
+		slog.InfoContext(ctx, "healthcheck success")
 	})
 
 	r.Handle("/metrics", promhttp.Handler())
