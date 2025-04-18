@@ -24,14 +24,14 @@ services:
     container_name: migrate
     command: >
       migrate apply
-      --dir file:///migrations
+      --dir file:///go/migrations
       --url postgresql://admin:admin@db:5432/app?sslmode=disable
       --allow-dirty
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - ./migrations/:/migrations
+      - ./go/migrations/:/migrations
     networks:
       - my_network
 
