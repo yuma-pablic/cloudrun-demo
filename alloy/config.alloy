@@ -118,7 +118,7 @@ pyroscope.scrape "scrape_job_name" {
 
 otelcol.exporter.otlp "default" {
   client {
-    endpoint = "tempo:3200"
+    endpoint = "tempo:4317"
 
     tls {
       insecure = true
@@ -150,7 +150,7 @@ otelcol.processor.memory_limiter "default" {
 
 otelcol.receiver.otlp "default" {
   http {
-    endpoint = "0.0.0.0:4318"
+    endpoint = "0.0.0.0:9999"
   }
 
   output {

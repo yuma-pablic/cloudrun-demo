@@ -27,7 +27,7 @@ import (
 
 func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {
 	exp, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpoint("localhost:12345"),
+		otlptracehttp.WithEndpoint("localhost:9999"),
 		otlptracehttp.WithInsecure(),
 	)
 	if err != nil {
