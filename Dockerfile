@@ -2,10 +2,10 @@ FROM golang:1.23.0 AS builder
 
 WORKDIR /app
 
-COPY ./go/go.* ./go
+COPY ./go/go.* ./
 RUN go mod download
 
-COPY ./go ./go
+COPY ./go ./
 
 RUN go build -o main cmd/main.go
 
