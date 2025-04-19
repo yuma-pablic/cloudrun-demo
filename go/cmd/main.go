@@ -17,8 +17,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
+
+	appmiddleware "api/middleware"
 )
 
 func main() {
@@ -41,9 +42,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Use(func(next http.Handler) http.Handler {
-		return otelhttp.NewHandler(next, "chi-handler")
-	})
+	r.Use(appmiddleware.TracingMiddleware("chi-handler"))
 
 	r.Use(custom.TraceIDMiddleware)
 
