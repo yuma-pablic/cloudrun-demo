@@ -2,6 +2,7 @@ package main
 
 import (
 	"api/config"
+	"api/handler"
 	sqlc "api/infra/sqlc"
 	"api/libs/logger"
 	"api/libs/metrics"
@@ -9,14 +10,12 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"net/http/pprof"
 	"os"
 
 	"api/custom"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -45,22 +44,6 @@ func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {
 	return tp, nil
 }
 
-func MountPprofRoutes(r chi.Router) {
-	r.Route("/debug/pprof", func(r chi.Router) {
-		r.Get("/", pprof.Index)
-		r.Get("/allocs", pprof.Handler("allocs").ServeHTTP)
-		r.Get("/block", pprof.Handler("block").ServeHTTP)
-		r.Get("/cmdline", pprof.Cmdline)
-		r.Get("/goroutine", pprof.Handler("goroutine").ServeHTTP)
-		r.Get("/heap", pprof.Handler("heap").ServeHTTP)
-		r.Get("/mutex", pprof.Handler("mutex").ServeHTTP)
-		r.Get("/profile", pprof.Profile)
-		r.Post("/symbol", pprof.Symbol)
-		r.Get("/symbol", pprof.Symbol)
-		r.Get("/threadcreate", pprof.Handler("threadcreate").ServeHTTP)
-		r.Get("/trace", pprof.Trace)
-	})
-}
 func main() {
 	ctx := context.Background()
 	logger.InitLogger()
@@ -96,8 +79,8 @@ func main() {
 	db := sqlc.New(conn)
 	metrics := metrics.NewMetrics()
 
-	MountPprofRoutes(r)
-
+	handler.RegisterPprofRoutes(r)
+	handler.RegisterMetricsRoute(r)
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
 
@@ -122,8 +105,6 @@ func main() {
 
 		slog.InfoContext(ctx, "healthcheck success")
 	})
-
-	r.Handle("/metrics", promhttp.Handler())
 
 	slog.Info("Starting server on :8080")
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
