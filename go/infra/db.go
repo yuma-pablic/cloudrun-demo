@@ -1,4 +1,4 @@
-package config
+package infra
 
 import (
 	"context"
@@ -9,9 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var DB *pgxpool.Pool
-
-func InitDB() *pgxpool.Pool {
+func NewPool() *pgxpool.Pool {
 	connStr := getConnStr()
 	ctx := context.Background()
 
@@ -21,12 +19,6 @@ func InitDB() *pgxpool.Pool {
 	}
 
 	return db
-}
-
-func CloseDB() {
-	if DB != nil {
-		DB.Close()
-	}
 }
 
 func getConnStr() string {
