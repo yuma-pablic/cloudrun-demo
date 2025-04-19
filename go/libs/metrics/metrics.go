@@ -17,7 +17,6 @@ func NewMetrics() *Metrics {
 		[]string{"path"},
 	)
 
-	// 明示的に Register
 	prometheus.MustRegister(requests)
 
 	return &Metrics{
