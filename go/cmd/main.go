@@ -16,7 +16,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -81,7 +80,7 @@ func main() {
 	metrics := metrics.NewMetrics()
 
 	handler.RegisterPprofRoutes(r)
-
+	handler.RegisterMetricsRoute(r)
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
 
@@ -106,8 +105,6 @@ func main() {
 
 		slog.InfoContext(ctx, "healthcheck success")
 	})
-
-	r.Handle("/metrics", promhttp.Handler())
 
 	slog.Info("Starting server on :8080")
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
