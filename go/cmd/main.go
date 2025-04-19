@@ -13,8 +13,6 @@ import (
 	"net/http"
 	"os"
 
-	"api/custom"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"go.opentelemetry.io/otel"
@@ -44,7 +42,7 @@ func main() {
 
 	r.Use(appmiddleware.TracingMiddleware("chi-handler"))
 
-	r.Use(custom.TraceIDMiddleware)
+	r.Use(appmiddleware.TraceIDMiddleware)
 
 	conn := config.InitDB()
 	defer config.CloseDB()
