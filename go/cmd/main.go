@@ -40,7 +40,7 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Use(appmiddleware.TracingMiddleware("chi-handler"))
+	r.Use(appmiddleware.TracingMiddleware())
 
 	r.Use(appmiddleware.TraceIDMiddleware)
 
