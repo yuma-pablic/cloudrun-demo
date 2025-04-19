@@ -9,10 +9,15 @@ import (
 
 func TracingMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			routePattern := chi.RouteContext(r.Context()).RoutePattern()
-			handler := otelhttp.NewHandler(next, routePattern)
-			handler.ServeHTTP(w, r)
-		})
+		handler := otelhttp.NewHandler(next, "HTTP",
+			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
+				pattern := chi.RouteContext(r.Context()).RoutePattern()
+				if pattern != "" {
+					return r.Method + " " + pattern
+				}
+				return r.Method + " " + r.URL.Path // fallback
+			}),
+		)
+		return handler
 	}
 }
