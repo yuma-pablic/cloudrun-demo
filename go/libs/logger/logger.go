@@ -60,7 +60,6 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 	return &multiHandler{handlers: newHandlers}
 }
 
-// ✅ TraceID を付与するカスタムハンドラ
 type traceHandler struct {
 	slog.Handler
 }
