@@ -44,16 +44,15 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(appmiddleware.TracingMiddleware())
+	r.Use(appmiddleware.TraceIDMiddleware)
+	r.Use(appmiddleware.MetricsMiddleware(metrics))
+	handler.RegisterPprofRoutes(r)
+	handler.RegisterMetricsRoute(r)
 
 	r.Route("/", func(r chi.Router) {
-		r.Use(appmiddleware.TracingMiddleware())
-		r.Use(appmiddleware.TraceIDMiddleware)
-
-		handler.RegisterPprofRoutes(r)
-		handler.RegisterMetricsRoute(r)
 
 		r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-			metrics.Requests.WithLabelValues(r.URL.Path).Inc()
 
 			ctx := r.Context()
 			_, err := db.Healthcheck(ctx)
