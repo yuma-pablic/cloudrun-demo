@@ -15,7 +15,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"go.opentelemetry.io/otel"
 
 	appmiddleware "api/middleware"
 )
@@ -54,10 +53,6 @@ func main() {
 	handler.RegisterMetricsRoute(r)
 	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		metrics.Requests.WithLabelValues(r.URL.Path).Inc()
-
-		tr := otel.Tracer("app/handler")
-		ctx, span := tr.Start(r.Context(), "Healthcheck")
-		defer span.End()
 
 		_, err := db.Healthcheck(ctx)
 		if err != nil {
