@@ -1,8 +1,8 @@
 package main
 
 import (
-	"api/config"
 	"api/handler"
+	"api/infra"
 	sqlc "api/infra/sqlc"
 	"api/libs/logger"
 	"api/libs/metrics"
@@ -35,8 +35,8 @@ func main() {
 		}
 	}()
 
-	conn := config.InitDB()
-	defer config.CloseDB()
+	conn := infra.NewPool()
+	defer conn.Close()
 
 	db := sqlc.New(conn)
 	metrics := metrics.NewMetrics()
