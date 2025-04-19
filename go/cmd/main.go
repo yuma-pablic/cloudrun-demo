@@ -44,35 +44,31 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(appmiddleware.TracingMiddleware())
+	r.Use(appmiddleware.TraceIDMiddleware)
+	r.Use(appmiddleware.MetricsMiddleware(metrics))
+	handler.RegisterPprofRoutes(r)
+	handler.RegisterMetricsRoute(r)
 
-	r.Route("/", func(r chi.Router) {
-		r.Use(appmiddleware.TracingMiddleware())
-		r.Use(appmiddleware.TraceIDMiddleware)
+	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 
-		handler.RegisterPprofRoutes(r)
-		handler.RegisterMetricsRoute(r)
+		ctx := r.Context()
+		_, err := db.Healthcheck(ctx)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			slog.Error("healthcheck failed", slog.String("error", err.Error()))
+			return
+		}
 
-		r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-			metrics.Requests.WithLabelValues(r.URL.Path).Inc()
+		response := map[string]string{"status": "ok"}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			slog.Error("failed to encode response", slog.String("error", err.Error()))
+			return
+		}
 
-			ctx := r.Context()
-			_, err := db.Healthcheck(ctx)
-			if err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				slog.Error("healthcheck failed", slog.String("error", err.Error()))
-				return
-			}
-
-			response := map[string]string{"status": "ok"}
-			w.Header().Set("Content-Type", "application/json")
-			if err := json.NewEncoder(w).Encode(response); err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				slog.Error("failed to encode response", slog.String("error", err.Error()))
-				return
-			}
-
-			slog.InfoContext(ctx, "healthcheck success")
-		})
+		slog.InfoContext(ctx, "healthcheck success")
 	})
 
 	slog.Info("Starting server on :8080")
