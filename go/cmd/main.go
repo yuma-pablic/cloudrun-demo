@@ -50,28 +50,25 @@ func main() {
 	handler.RegisterPprofRoutes(r)
 	handler.RegisterMetricsRoute(r)
 
-	r.Route("/", func(r chi.Router) {
+	r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 
-		r.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		_, err := db.Healthcheck(ctx)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			slog.Error("healthcheck failed", slog.String("error", err.Error()))
+			return
+		}
 
-			ctx := r.Context()
-			_, err := db.Healthcheck(ctx)
-			if err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				slog.Error("healthcheck failed", slog.String("error", err.Error()))
-				return
-			}
+		response := map[string]string{"status": "ok"}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			slog.Error("failed to encode response", slog.String("error", err.Error()))
+			return
+		}
 
-			response := map[string]string{"status": "ok"}
-			w.Header().Set("Content-Type", "application/json")
-			if err := json.NewEncoder(w).Encode(response); err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				slog.Error("failed to encode response", slog.String("error", err.Error()))
-				return
-			}
-
-			slog.InfoContext(ctx, "healthcheck success")
-		})
+		slog.InfoContext(ctx, "healthcheck success")
 	})
 
 	slog.Info("Starting server on :8080")
