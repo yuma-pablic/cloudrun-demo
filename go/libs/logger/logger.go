@@ -74,7 +74,7 @@ func (h *traceHandler) Handle(ctx context.Context, r slog.Record) error {
 }
 
 func InitLogger() {
-	logDir := "./go/logs"
+	logDir := "../logs"
 	logPath := logDir + "/app.log"
 
 	if err := os.MkdirAll(logDir, 0755); err != nil {

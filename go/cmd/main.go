@@ -6,49 +6,25 @@ import (
 	sqlc "api/infra/sqlc"
 	"api/libs/logger"
 	"api/libs/metrics"
+	"api/libs/trace"
 	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
 
-	"api/custom"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+
+	appmiddleware "api/middleware"
 )
-
-func initTracer(ctx context.Context) (*sdktrace.TracerProvider, error) {
-	exp, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpoint("localhost:9999"),
-		otlptracehttp.WithInsecure(),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exp),
-		sdktrace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceNameKey.String("app"),
-		)),
-	)
-	otel.SetTracerProvider(tp)
-	return tp, nil
-}
 
 func main() {
 	ctx := context.Background()
 	logger.InitLogger()
 
-	tp, err := initTracer(ctx)
+	tp, err := trace.InitTracer(ctx)
 	if err != nil {
 		slog.Error("failed to initialize tracer", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -64,14 +40,9 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Use(func(next http.Handler) http.Handler {
-		return otelhttp.NewHandler(next, "chi-handler")
-	})
+	r.Use(appmiddleware.TracingMiddleware("chi-handler"))
 
-	r.Use(custom.TraceIDMiddleware)
-	r.Use(func(next http.Handler) http.Handler {
-		return otelhttp.NewHandler(next, "chi-handler")
-	})
+	r.Use(appmiddleware.TraceIDMiddleware)
 
 	conn := config.InitDB()
 	defer config.CloseDB()
