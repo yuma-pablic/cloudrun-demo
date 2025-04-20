@@ -9,6 +9,7 @@ import (
 	"api/libs/trace"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -56,7 +57,7 @@ func main() {
 		_, err := db.Healthcheck(ctx)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			slog.Error("healthcheck failed", slog.String("error", err.Error()))
+			slog.ErrorContext(ctx, "healthcheck failed", slog.String("error", err.Error()))
 			return
 		}
 
@@ -64,11 +65,32 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			slog.Error("failed to encode response", slog.String("error", err.Error()))
+			slog.ErrorContext(ctx, "failed to encode response", slog.String("error", err.Error()))
 			return
 		}
 
 		slog.InfoContext(ctx, "healthcheck success")
+	})
+
+	r.Get("/errorcheck", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		err := fmt.Errorf("simulated error for testing")
+		if err != nil {
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "errorcheck failed", slog.String("error", err.Error()))
+			return
+		}
+
+		response := map[string]string{"status": "ok"}
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "failed to encode response", slog.String("error", err.Error()))
+			return
+		}
+
+		slog.InfoContext(ctx, "errorcheck success")
 	})
 
 	slog.Info("Starting server on :8080")

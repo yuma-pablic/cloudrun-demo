@@ -29,14 +29,18 @@ prometheus.scrape "app" {
   forward_to = [prometheus.remote_write.demo.receiver]
 }
 
-loki.source.file "app" {
-  targets = [
+local.file_match "logs" {
+  path_targets = [
     {
       __path__ = "/logs/app.log",
       job      = "app",
+      service_name = "api",
     },
   ]
+}
 
+loki.source.file "app" {
+  targets = local.file_match.logs.targets
   forward_to = [loki.write.default.receiver]
 }
 
@@ -63,6 +67,7 @@ loki.process "app" {
   stage.labels  {
     values = {
       level = "INFO",
+      level = "ERROR",
     }
   }
 
