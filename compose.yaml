@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:16
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: db
     environment:
       POSTGRES_USER: admin
@@ -22,7 +22,7 @@ services:
 
   migrate:
     image: arigaio/atlas:latest
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: migrate
     command: >
       migrate apply
@@ -39,7 +39,7 @@ services:
 
   node-exporter:
     image: prom/node-exporter:v1.9.1
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: node-exporter
     ports:
       - '9100:9100'
@@ -47,7 +47,7 @@ services:
       - my_network
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:v0.17.1
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: postgres-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/app?sslmode=disable"
@@ -60,7 +60,7 @@ services:
 
   grafana-alloy:
     image: grafana/alloy:v1.8.1
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: grafana-alloy
     working_dir: /etc/alloy
     command: ["run", "/etc/alloy/config.alloy"]
@@ -73,7 +73,7 @@ services:
       - "9999:9999"
   tempo:
     image: grafana/tempo:2.1.1
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: tempo
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     volumes:
@@ -100,7 +100,7 @@ services:
      - my_network
   loki:
     container_name: loki
-    platform: linux/amd64
+    platform: linux/arm64
     image: grafana/loki:3.4.3
     command: "-config.file=/etc/loki/loki.yaml"
     environment:
@@ -114,7 +114,7 @@ services:
       - 3100:3100
   pyroscope:
     image: grafana/pyroscope:1.12.2
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: pyroscope
     ports:
       - "4040:4040"
@@ -122,7 +122,7 @@ services:
       - my_network
   grafana:
     image: grafana/grafana:11.6.0
-    platform: linux/amd64
+    platform: linux/arm64
     container_name: grafana
     ports:
       - 3000:3000
