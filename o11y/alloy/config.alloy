@@ -56,6 +56,7 @@ loki.process "app" {
       time  = "time",
       level = "level",
       msg   = "msg",
+      trace_id = "trace_id",
     }
   }
 
@@ -66,8 +67,8 @@ loki.process "app" {
 
   stage.labels  {
     values = {
-      level = "INFO",
-      level = "ERROR",
+      trace_id = "",
+      level = "",
     }
   }
 
@@ -154,6 +155,7 @@ otelcol.processor.memory_limiter "default" {
 }
 
 otelcol.receiver.otlp "default" {
+  grpc {}
   http {
     endpoint = "0.0.0.0:9999"
   }
@@ -161,6 +163,16 @@ otelcol.receiver.otlp "default" {
   output {
     traces = [
       otelcol.processor.memory_limiter.default.input,
+      otelcol.connector.spanlogs.default.input,
     ]
+  }
+}
+
+otelcol.connector.spanlogs "default" {
+  roots = true
+  span_attributes = ["http.method", "http.target"]
+
+  output {
+    logs = [otelcol.exporter.otlp.default.input]
   }
 }
