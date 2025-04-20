@@ -1,0 +1,31 @@
+version: "3"
+
+silent: true
+
+tasks:
+  run-dev:
+    desc: Run the application in development mode
+    cmds:
+      - docker compose up -d
+      - go run cmd/main.go
+
+  lint:
+    desc: Run the linter
+    cmds:
+      - golangci-lint run
+      - sqlfluff lint schema.sql queries/ --dialect postgres
+
+  fmt:
+    desc: Format the code
+    cmds:
+      - sqlfluff fix schema.sql queries/ --dialect postgres
+
+  create-migration:
+    desc: Create a new migration
+    cmds:
+      - atlas migrate diff --config atlas.hcl {{.CLI_ARGS}} --env local
+
+  migrate:
+    desc: Run the migrations
+    cmds:
+      - atlas migrate apply --config atlas.hcl --env local

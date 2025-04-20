@@ -56,10 +56,10 @@ services:
     ports:
       - "9187:9187"
 
-  grafana-alloy:
+  alloy:
     image: grafana/alloy:v1.8.1
     platform: linux/arm64
-    container_name: grafana-alloy
+    container_name: alloy
     working_dir: /etc/alloy
     command: ["run", "/etc/alloy/config.alloy"]
     volumes:
@@ -69,6 +69,11 @@ services:
       - my_network
     ports:
       - "9999:9999"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9999"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   tempo:
     image: grafana/tempo:2.1.1
     platform: linux/arm64
@@ -80,6 +85,11 @@ services:
       - "3200:3200"
       - "4317:4317"
       - "4318:4318"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3200"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - my_network
 
@@ -94,6 +104,11 @@ services:
    command:
      - '--config.file=/etc/prometheus/prometheus.yml'
      - '--web.enable-remote-write-receiver'
+   healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
    networks:
      - my_network
   loki:
@@ -106,6 +121,11 @@ services:
       LOG_SIM_TH: '0.3'
     volumes:
       - ./o11y/loki/loki.yaml:/etc/loki/loki.yaml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3100"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - my_network
     ports:
@@ -116,6 +136,11 @@ services:
     container_name: pyroscope
     ports:
       - "4040:4040"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4040"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - my_network
   grafana:
@@ -145,6 +170,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      alloy:
+        condition: service_started
+      loki:
+        condition: service_started
+      pyroscope:
+        condition: service_started
+      prometheus:
+        condition: service_started
+
 
 volumes:
   pgdata:
