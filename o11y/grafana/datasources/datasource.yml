@@ -41,6 +41,20 @@ datasources:
     jsonData:
       timeout: 60
       maxLines: 1000
+      derivedFields:
+      - datasourceUid: Tempo
+        matcherRegex: 'traceID=(\\w+)'
+        name: TraceID
+        url: 'http://tempo:3200/trace/$${__value.raw}'
+        urlDisplayLabel: Find this trace in Tempo
+
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      timeout: 60
+      maxLines: 1000
 
   - name: Pyroscope
     type: grafana-pyroscope-datasource
