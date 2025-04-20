@@ -2,30 +2,51 @@ version: "3"
 
 silent: true
 
+includes:
+  go:
+    taskfile: ./go/Taskfile.go.yaml
+    dir: ./go
+
 tasks:
+  default:
+    aliases:
+      - list
+    desc: List all tasks
+    cmd: task -l
+
   run-dev:
+    aliases:
+      - rd
     desc: Run the application in development mode
-    cmds:
-      - docker compose up -d
-      - go run go/cmd/main.go
+    cmd: docker compose up -d && task go:run-dev
+  
+  run-down:
+    aliases:
+      - rd
+    desc: Run the application in development mode
+    cmd: docker compose down
 
   lint:
+    aliases:
+      - l
     desc: Run the linter
-    cmds:
-      - golangci-lint run
-      - sqlfluff lint go/schema.sql go/queries/ --dialect postgres
+    cmd: task go:lint
 
   fmt:
+    aliases:
+      - f
     desc: Format the code
-    cmds:
-      - sqlfluff fix go/schema.sql go/queries/ --dialect postgres
+    cmd: task go:fmt
 
   create-migration:
+    aliases:
+      - cm
     desc: Create a new migration
-    cmds:
-      - atlas migrate diff --config go/atlas.hcl {{.CLI_ARGS}} --env local
+    cmd: task go:create-migration
 
   migrate:
+    aliases:
+      - m
     desc: Run the migrations
-    cmds:
-      - atlas migrate apply --config go/atlas.hcl --env local
+    cmd: task go:migrate
+
