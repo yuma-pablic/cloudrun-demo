@@ -6,6 +6,9 @@ includes:
   go:
     taskfile: ./go/Taskfile.go.yaml
     dir: ./go
+  o11y:
+    taskfile: ./o11y/Taskfile.o11y.yaml
+    dir: ./o11y
 
 tasks:
   default:
@@ -36,7 +39,7 @@ tasks:
     aliases:
       - f
     desc: Format the code
-    cmd: task go:fmt
+    cmd: task go:fmt && task o11y:fmt
 
   create-migration:
     aliases:
