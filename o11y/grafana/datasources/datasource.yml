@@ -33,7 +33,7 @@ datasources:
       incrementalQueryOverlapWindow: 10m
       exemplarTraceIdDestinations:
       uid: PBFA97CFB590B2093
-  
+
   - name: Loki
     type: loki
     access: proxy
@@ -41,6 +41,29 @@ datasources:
     jsonData:
       timeout: 60
       maxLines: 1000
+      derivedFields:
+      - datasourceUid: Tempo
+        matcherRegex: "traceID=(\\w+)"
+        name: TraceID
+        url: 'http://tempo:3200/trace/$${__value.raw}'
+
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      timeout: 60
+      maxLines: 1000
+      tracesToLogsV2:
+        datasourceUid: 'Loki'
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '-1h'
+        tags: [
+            { key: 'app'}
+        ]
+        filterByTraceID: true
+        filterBySpanID: true
+        customQuery: false
 
   - name: Pyroscope
     type: grafana-pyroscope-datasource
