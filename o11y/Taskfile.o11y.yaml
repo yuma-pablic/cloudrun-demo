@@ -1,0 +1,9 @@
+version: "3"
+
+silent: true
+
+tasks:
+  fmt:
+    desc: Format the code
+    cmds:
+      - alloy fmt -w ./alloy/config.alloy
