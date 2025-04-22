@@ -26,7 +26,7 @@ func getConnStr() string {
 	pass := getEnv("DB_PASS", "admin")
 	host := getEnv("DB_HOST", "localhost")
 	port := getEnv("DB_PORT", "5432")
-	dbname := getEnv("DB_NAME", "app")
+	dbname := getEnv("DB_NAME", "postgres")
 
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, pass, host, port, dbname)
 }

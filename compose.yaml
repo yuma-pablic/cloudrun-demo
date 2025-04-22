@@ -25,7 +25,7 @@ services:
     command: >
       migrate apply
       --dir file:///go/migrations
-      --url postgresql://admin:admin@db:5432/app?sslmode=disable
+      --url postgresql://admin:admin@db:5432/postgres?sslmode=disable
       --allow-dirty
     depends_on:
       db:
@@ -48,7 +48,7 @@ services:
     platform: linux/arm64
     container_name: postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/app?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://admin:admin@db:5432/postgres?sslmode=disable"
     networks:
       - my_network
     depends_on:
